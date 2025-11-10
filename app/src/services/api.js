@@ -34,4 +34,9 @@ export const Api = {
       body: JSON.stringify(payload),
     });
   },
+  // --- FUNGSI BARU ---
+  getHumidityReadings() {
+    return request("/api/humidity");
+  },
+  // --------------------
 };

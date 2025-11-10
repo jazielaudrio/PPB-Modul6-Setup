@@ -32,7 +32,8 @@
       "backendUrl": "http://10.131.129.197:5000",
       "mqtt": {
         "brokerUrl": "wss://broker.hivemq.com:8884/mqtt",
-        "topic": "ppb/kelXX/iot/temperature"
+        "topic": "ppb/kel39/iot/temperature",
+        "topicHumidity": "ppb/kel39/iot/humidity"
       }
     },
     "plugins": [

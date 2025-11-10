@@ -3,6 +3,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import readingsRoutes from "./routes/readingsRoutes.js";
 import thresholdsRoutes from "./routes/thresholdsRoutes.js";
+import humidityReadingsRoutes from "./routes/humidityReadingsRoutes.js"; // BARU
 
 dotenv.config();
 
@@ -12,6 +13,7 @@ app.use(express.json());
 
 app.use("/api/readings", readingsRoutes);
 app.use("/api/thresholds", thresholdsRoutes);
+app.use("/api/humidity", humidityReadingsRoutes); // BARU
 
 const port = process.env.PORT || 5000;
 app.listen(port, '0.0.0.0', () => {

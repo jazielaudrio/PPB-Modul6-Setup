@@ -1,7 +1,8 @@
 import mqtt from "mqtt";
 
 const BROKER_URL = "mqtt://broker.hivemq.com:1883";
-const TOPIC = "ppb/kel39/iot/temperature";
+const TOPIC_TEMP = "ppb/kel39/iot/temperature";
+const TOPIC_HUMIDITY = "ppb/kel39/iot/humidity"; 
 const BACKEND_BASE_URL = "http://localhost:5000";
 const PUBLISH_INTERVAL_MS = 5000;
 
@@ -36,21 +37,62 @@ async function fetchLatestThreshold() {
   }
 }
 
+// --- FUNGSI BARU UNTUK POST KELEMBAPAN ---
+async function saveHumidityReading(humidity) {
+  try {
+    const response = await fetch(`${BACKEND_BASE_URL}/api/humidity`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ humidity }),
+    });
+
+    if (!response.ok) {
+      const text = await response.text();
+      throw new Error(`HTTP ${response.status}: ${text}`);
+    }
+    console.log(`Saved humidity reading ${humidity}%`);
+  } catch (error) {
+    console.error("Failed to save humidity reading:", error.message);
+  }
+}
+// ----------------------------------------
+
 async function publishLoop() {
   let latestThreshold = await fetchLatestThreshold();
 
   setInterval(async () => {
-    const temperature = Number((Math.random() * 15 + 20).toFixed(2));
-    const payload = JSON.stringify({ temperature, timestamp: new Date().toISOString() });
+    const timestamp = new Date().toISOString();
 
-    client.publish(TOPIC, payload, { qos: 0 }, (error) => {
+    // Data Temperatur
+    const temperature = Number((Math.random() * 15 + 20).toFixed(2));
+    const tempPayload = JSON.stringify({ temperature, timestamp });
+
+    client.publish(TOPIC_TEMP, tempPayload, { qos: 0 }, (error) => {
       if (error) {
         console.error("Failed to publish temperature", error.message);
       } else {
-        console.log(`Published ${payload} to ${TOPIC}`);
+        console.log(`Published ${tempPayload} to ${TOPIC_TEMP}`);
       }
     });
 
+    // Data Kelembapan
+    const humidity = Number((Math.random() * 30 + 40).toFixed(2)); 
+    const humidityPayload = JSON.stringify({ humidity, timestamp });
+
+    client.publish(TOPIC_HUMIDITY, humidityPayload, { qos: 0 }, (error) => {
+      if (error) {
+        console.error("Failed to publish humidity", error.message);
+      } else {
+        console.log(`Published ${humidityPayload} to ${TOPIC_HUMIDITY}`);
+      }
+    });
+
+    // --- PANGGIL FUNGSI BARU ---
+    // Simpan SETIAP data kelembapan ke backend
+    await saveHumidityReading(humidity);
+    // ---------------------------
+
+    // Logika threshold tetap untuk temperatur
     if (latestThreshold === null || Math.random() < 0.2) {
       latestThreshold = await fetchLatestThreshold();
     }
